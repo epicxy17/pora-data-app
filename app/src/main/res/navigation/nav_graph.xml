@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+
+    <fragment android:id="@+id/homeFragment"
+        android:name="pora.data.proj.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home">
+        <action android:id="@+id/action_homeFragment_to_photosFragment" app:destination="@id/photosFragment"/>
+        <action android:id="@+id/action_homeFragment_to_voiceRecordingsFragment" app:destination="@id/voiceRecordingsFragment"/>
+        <action android:id="@+id/action_homeFragment_to_speedometerFragment" app:destination="@id/speedometerFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/photosFragment"
+        android:name="pora.data.proj.PhotosFragment"
+        android:label="PhotosFragment"
+        tools:layout="@layout/fragment_photos"/>
+    <fragment
+        android:id="@+id/voiceRecordingsFragment"
+        android:name="pora.data.proj.VoiceRecordingsFragment"
+        android:label="VoiceRecordingsFragment"
+        tools:layout="@layout/fragment_voice_recordings"/>
+    <fragment
+        android:id="@+id/speedometerFragment"
+        android:name="pora.data.proj.SpeedometerFragment"
+        android:label="SpeedometerFragment"
+        tools:layout="@layout/fragment_speedometer"/>
+
+</navigation>

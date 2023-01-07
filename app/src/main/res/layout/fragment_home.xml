@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    android:id="@+id/parent_lvl"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/purple_500"
+    tools:context=".MainActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="53dp"/>
+
+        <ImageView
+            android:id="@+id/top_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_top_left_illustration"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/top_right"
+            android:layout_width="95dp"
+            android:layout_height="125dp"
+            android:src="@drawable/ic_top_right_illustration"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <ImageView
+            android:id="@+id/triangle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="120dp"
+            android:src="@drawable/ic_triangle"
+            app:layout_constraintStart_toStartOf="@id/guideline"
+            app:layout_constraintTop_toTopOf="@id/top_left" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/triangle"
+            app:layout_constraintTop_toTopOf="@id/triangle"
+            app:layout_constraintBottom_toBottomOf="@id/triangle"
+            android:text="@string/app_name"
+            android:textSize="@dimen/large"
+            android:textColor="@color/white"
+            android:layout_marginStart="24dp"
+            />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/photos_button"
+            android:layout_width="360dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/triangle"
+            android:text="@string/photos"
+            android:layout_marginTop="32dp"
+            />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/voice_recordings_button"
+            android:layout_width="360dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/photos_button"
+            android:text="@string/voice_recordings"
+            />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/speedometer_button"
+            android:layout_width="360dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/voice_recordings_button"
+            app:layout_constraintTop_toBottomOf="@id/voice_recordings_button"
+            android:text="@string/speedometer_sim_data"
+            />
+
+        <ImageView
+            android:id="@+id/planet"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:src="@drawable/data_image"
+            app:layout_constraintTop_toBottomOf="@id/speedometer_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

@@ -1,0 +1,29 @@
+package pora.data.proj.networking
+
+import android.content.Context
+import com.chuckerteam.chucker.api.ChuckerInterceptor
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+
+object ApiModule {
+    private const val BASE_URL = "http://10.0.2.2:3001/"
+
+    lateinit var retrofit: ApiService
+
+    private val json = Json { ignoreUnknownKeys = true }
+
+    fun initRetrofit(context : Context) {
+        val okhttp = OkHttpClient.Builder()
+            .addInterceptor(ChuckerInterceptor.Builder(context).build())
+            .build()
+        retrofit = Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .client(okhttp)
+            .build()
+            .create(ApiService::class.java)
+    }
+}

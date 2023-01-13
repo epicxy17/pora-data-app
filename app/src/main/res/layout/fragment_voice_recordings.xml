@@ -7,11 +7,23 @@
     android:layout_height="match_parent">
 
 
-<TextView
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    android:text="some fragment souds"/>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/record_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:layout_constraintBottom_toTopOf="@id/play_button"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="record"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/play_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="play"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

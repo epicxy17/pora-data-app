@@ -17,8 +17,19 @@ import pora.data.proj.databinding.FragmentSpeedometerBinding
 import java.math.RoundingMode
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.util.Calendar
+import java.util.TimeZone
+import java.util.UUID
 import kotlin.math.min
 import kotlin.random.Random
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.ResponseBody
+import pora.data.proj.models.SpeedometerRequest
+import pora.data.proj.networking.ApiModule
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 val TAG: String = "SpeedometerFragment"
 
@@ -34,10 +45,11 @@ class SpeedometerFragment : Fragment(), SensorEventListener
     private var isFast = false
 
     private var minutes = 5
+    private var uuid = UUID.randomUUID().toString()
     private var startTime = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
     private var endTime = startTime + minutes * 60
 
-    private var samples = mutableListOf<FloatArray>()
+    private var samples = mutableListOf<List<Float>>()
 
     private lateinit var sensorManager: SensorManager
 
@@ -48,6 +60,7 @@ class SpeedometerFragment : Fragment(), SensorEventListener
     ): View?
     {
         super.onCreate(savedInstanceState)
+
         _binding = FragmentSpeedometerBinding.inflate(inflater, container, false)
         sharedPreferences = requireContext().getSharedPreferences("data", Context.MODE_PRIVATE)
 
@@ -98,10 +111,27 @@ class SpeedometerFragment : Fragment(), SensorEventListener
         {
             if (LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) >= endTime)
             {
-                samples.add(event.values)
+                samples.add(listOf(event.values[0], event.values[1], event.values[2]))
 
                 if (samples.size == 500)
                 {
+                    val timeZone: TimeZone = TimeZone.getTimeZone("CET")
+                    val calendar: Calendar = Calendar.getInstance(timeZone)
+                    val dateTime = calendar.time.toString()
+
+                    val request = SpeedometerRequest(samples, uuid, dateTime)
+                    ApiModule.retrofit.uploadSpeedometerData(request).enqueue(object : Callback<ResponseBody> {
+                        override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                            if (response.isSuccessful) {
+                                Log.d("shows success", "on success: " + response.body())
+                            }
+                        }
+
+                        override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                            Log.d("shows fail", "onFailure: " + t + call.toString())
+                        }
+
+                    })
                     Log.i(TAG, "SENDING DATA")
                     samples.clear()
 

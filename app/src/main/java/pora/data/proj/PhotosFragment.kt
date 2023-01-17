@@ -185,6 +185,10 @@ class PhotosFragment : Fragment() {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful) {
                     Log.d("shows success", "on success: " + response.body())
+                    val text = "upload successful!"
+                    val duration = Toast.LENGTH_SHORT
+                    val toast = Toast.makeText(requireContext(), text, duration)
+                    toast.show()
                 }
             }
 

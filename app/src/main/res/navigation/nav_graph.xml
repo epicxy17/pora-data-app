@@ -11,25 +11,52 @@
         android:name="pora.data.proj.HomeFragment"
         android:label="fragment_home"
         tools:layout="@layout/fragment_home">
-        <action android:id="@+id/action_homeFragment_to_photosFragment" app:destination="@id/photosFragment"/>
         <action android:id="@+id/action_homeFragment_to_voiceRecordingsFragment" app:destination="@id/voiceRecordingsFragment"/>
         <action android:id="@+id/action_homeFragment_to_speedometerFragment" app:destination="@id/speedometerFragment"/>
+        <action android:id="@+id/action_homeFragment_to_busStationsFragment" app:destination="@id/busStationsFragment"/>
     </fragment>
 
     <fragment
         android:id="@+id/photosFragment"
         android:name="pora.data.proj.PhotosFragment"
         android:label="PhotosFragment"
-        tools:layout="@layout/fragment_photos"/>
+        tools:layout="@layout/fragment_photos">
+        <argument
+            android:defaultValue="null"
+            android:name="id"
+            app:argType="string"/>
+        <argument
+            android:defaultValue="null"
+            android:name="name"
+            app:argType="string"/>
+        <argument
+            android:defaultValue="0"
+            android:name="lat"
+            app:argType="float"/>
+        <argument
+            android:defaultValue="0"
+            android:name="long"
+            app:argType="float"/>
+    </fragment>
+
     <fragment
         android:id="@+id/voiceRecordingsFragment"
         android:name="pora.data.proj.VoiceRecordingsFragment"
         android:label="VoiceRecordingsFragment"
         tools:layout="@layout/fragment_voice_recordings"/>
+
     <fragment
         android:id="@+id/speedometerFragment"
         android:name="pora.data.proj.SpeedometerFragment"
         android:label="SpeedometerFragment"
         tools:layout="@layout/fragment_speedometer"/>
+
+    <fragment
+        android:id="@+id/busStationsFragment"
+        android:name="pora.data.proj.BusStationsFragment"
+        android:label="BusStationsFragment"
+        tools:layout="@layout/fragment_bus_stations">
+        <action android:id="@+id/action_busStationsFragment_to_photosFragment" app:destination="@id/photosFragment"/>
+    </fragment>
 
 </navigation>

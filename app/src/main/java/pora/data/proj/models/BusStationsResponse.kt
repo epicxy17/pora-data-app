@@ -14,6 +14,5 @@ data class BusStationsResponse (
 
 @Serializable
 data class Location (
-    @SerialName("type") val type: String,
-    @SerialName("coordinates") val coordinates: List<Float>,
+    @SerialName("coordinates") val coordinates: List<Double>,
 )

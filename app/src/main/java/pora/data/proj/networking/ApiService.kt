@@ -1,5 +1,6 @@
 package pora.data.proj.networking
 
+import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import pora.data.proj.models.BusStationsResponse
@@ -15,18 +16,23 @@ interface ApiService {
     fun busStations(): Call<List<BusStationsResponse>>
 
     @Multipart
-    @POST("upload")
-    fun upload(
-        @Part("description") description: RequestBody?,
-        @Part file: Part?
-    ): Call<ResponseBody?>?
+    @POST("/images/upload")
+    fun uploadImage(
+        @Part("name") name: RequestBody,
+        @Part("station_id") id: RequestBody,
+        @Part("latitude") lat: RequestBody,
+        @Part("longitude") long: RequestBody,
+        @Part("date_time") dateTime: RequestBody,
+        @Part image: MultipartBody.Part,
+    ): Call<ResponseBody>
 
-//    @GET("/shows/{id}")
-//    fun getShow(@Path("id") id: String): Call<ShowResponse>
-//
-//    @GET("/shows/{show_id}/reviews")
-//    fun getReviews(@Path("show_id") id: String): Call<ReviewsResponse>
-//
-//    @POST("/reviews/")
-//    fun createReview(@Body review: ReviewReguest): Call<ReviewResponse>
+    @Multipart
+    @POST("/voiceRecordings/upload")
+    fun uploadVoiceRecording(
+        @Part("name") name: RequestBody,
+        @Part("latitude") lat: RequestBody,
+        @Part("longitude") long: RequestBody,
+        @Part("date_time") dateTime: RequestBody,
+        @Part sound: MultipartBody.Part,
+    ): Call<ResponseBody>
 }

@@ -26,7 +26,7 @@ class HomeFragment : Fragment() {
 
 
         binding.photosButton.setOnClickListener {
-            val directions = HomeFragmentDirections.actionHomeFragmentToPhotosFragment()
+            val directions = HomeFragmentDirections.actionHomeFragmentToBusStationsFragment()
             findNavController().navigate(directions)
         }
 

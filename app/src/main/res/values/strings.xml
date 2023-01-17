@@ -3,4 +3,6 @@
     <string name="photos">Photos</string>
     <string name="voice_recordings">Voice Recordings</string>
     <string name="speedometer_sim_data">Speedometer sim data</string>
+    <string name="camera_button">take picture</string>
+    <string name="taken_picture">taken picture</string>
 </resources>

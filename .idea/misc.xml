@@ -8,10 +8,14 @@
         <entry key="app/src/main/res/drawable/ic_top_left_illustration.xml" value="0.1715" />
         <entry key="app/src/main/res/drawable/ic_top_right_illustration.xml" value="0.1715" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1546875" />
+        <entry key="app/src/main/res/layout/fragment_bus_statiions.xml" value="0.31614583333333335" />
+        <entry key="app/src/main/res/layout/fragment_bus_stations.xml" value="0.13179347826086957" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.22395833333333334" />
         <entry key="app/src/main/res/layout/fragment_photos.xml" value="0.1546875" />
         <entry key="app/src/main/res/layout/fragment_sounds.xml" value="0.1546875" />
         <entry key="app/src/main/res/layout/fragment_speedmeter.xml" value="0.1546875" />
+        <entry key="app/src/main/res/layout/fragment_speedometer.xml" value="0.31614583333333335" />
+        <entry key="app/src/main/res/layout/view_bus_station.xml" value="0.31614583333333335" />
       </map>
     </option>
   </component>

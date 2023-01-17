@@ -156,11 +156,11 @@ class SpeedometerFragment : Fragment(), SensorEventListener
                     Toast.makeText(context, "Extreme event happened, call help!", Toast.LENGTH_LONG).show()
 
 
-                binding.xText.text =
+                binding.xText.text = "X: " +
                     event.values[0].toBigDecimal().setScale(1, RoundingMode.HALF_EVEN).toString()
-                binding.yText.text =
+                binding.yText.text = "Y: " +
                     event.values[1].toBigDecimal().setScale(1, RoundingMode.HALF_EVEN).toString()
-                binding.zText.text =
+                binding.zText.text = "Z: " +
                     event.values[2].toBigDecimal().setScale(1, RoundingMode.HALF_EVEN).toString()
             }
             else if (isSlow)

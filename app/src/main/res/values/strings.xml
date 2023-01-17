@@ -8,4 +8,7 @@
     <string name="upload">upload</string>
     <string name="play">play</string>
     <string name="record">record</string>
+    <string name="simulate_string">Simulate</string>
+    <string name="traffic_string">Traffic</string>
+    <string name="timer_text">Send every 5 minutes</string>
 </resources>

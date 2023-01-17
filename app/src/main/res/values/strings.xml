@@ -5,4 +5,7 @@
     <string name="speedometer_sim_data">Speedometer sim data</string>
     <string name="camera_button">take picture</string>
     <string name="taken_picture">taken picture</string>
+    <string name="upload">upload</string>
+    <string name="play">play</string>
+    <string name="record">record</string>
 </resources>

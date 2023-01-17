@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.location.Location
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.os.Bundle
@@ -11,10 +12,24 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import java.io.File
 import pora.data.proj.networking.ApiModule
 import java.io.IOException
+import java.util.Calendar
+import java.util.TimeZone
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.ResponseBody
 import pora.data.proj.databinding.FragmentVoiceRecordingsBinding
 import pora.data.proj.models.BusStationsResponse
 import retrofit2.Call
@@ -29,15 +44,22 @@ class VoiceRecordingsFragment : Fragment() {
     private var _binding: FragmentVoiceRecordingsBinding? = null
     private val binding get() = _binding!!
     private lateinit var sharedPreferences: SharedPreferences
-    private var fileName: String = ""
+    private var fileName: String = "somefile"
 
     private var recorder: MediaRecorder? = null
+
 
     private var player: MediaPlayer? = null
 
     // Requesting permission to RECORD_AUDIO
     private var permissionToRecordAccepted = false
     private var permissions: Array<String> = arrayOf(Manifest.permission.RECORD_AUDIO)
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var activityResultLauncher: ActivityResultLauncher<Array<String>>
+    private var currentLocation: Location = Location("dummyprovider")
+
+
 
 
     override fun onRequestPermissionsResult(
@@ -68,6 +90,7 @@ class VoiceRecordingsFragment : Fragment() {
     private fun startPlaying() {
         player = MediaPlayer().apply {
             try {
+                Log.e("path", fileName)
                 setDataSource(fileName)
                 prepare()
                 start()
@@ -98,6 +121,7 @@ class VoiceRecordingsFragment : Fragment() {
     }
 
     private fun stopRecording() {
+        binding.uploadButton.isEnabled = true
         recorder?.apply {
             stop()
             release()
@@ -105,48 +129,23 @@ class VoiceRecordingsFragment : Fragment() {
         recorder = null
     }
 
-    //    private fun uploadFile(fileUri: Uri) {
-    //        // create RequestBody instance from file
-    //        BitmapFactory.decodeFile(currentPhotoPath, bmOptions)?.also { bitmap ->
-    //            bitmap
-    //        }
-    //        val requestFile: RequestBody = RequestBody.create(
-    //            MediaType.parse(getContentResolver().getType(BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
-    //                bitmap
-    //            })),
-    //            file
-    //        )
-    //
-    //        // MultipartBody.Part is used to send also the actual file name
-    //        val body: Part = createFormData.createFormData("picture", file.name, requestFile)
-    //
-    //        // add another part within the multipart request
-    //        val descriptionString = "hello, this is description speaking"
-    //        val description = RequestBody.create(
-    //            MultipartBody.FORM, descriptionString
-    //        )
-    //
-    //        // finally, execute the request
-    //        val call: Call<ResponseBody> = service.upload(description, body)
-    //        call.enqueue(object : Callback<ResponseBody?> {
-    //            override fun onResponse(
-    //                call: Call<ResponseBody?>,
-    //                response: Response<ResponseBody?>
-    //            ) {
-    //                Log.v("Upload", "success")
-    //            }
-    //
-    //            override fun onFailure(call: Call<ResponseBody?>, t: Throwable) {
-    //                Log.e("Upload error:", t.message!!)
-    //            }
-    //        })
-    //    }
-
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreate(savedInstanceState)
         _binding = FragmentVoiceRecordingsBinding.inflate(inflater, container, false)
         sharedPreferences = requireContext().getSharedPreferences("data", Context.MODE_PRIVATE)
+        currentLocation.latitude = 0.0;
+        currentLocation.longitude = 0.0;
+        val appPerms = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_NETWORK_STATE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.INTERNET
+        )
+
+        activityResultLauncher.launch(appPerms)
+        getLocation()
         // Record to the external cache directory for visibility
         fileName = "${requireContext().externalCacheDir?.absolutePath}/audiorecordtest.3gp"
         requireContext().externalCacheDir?.absolutePath?.let { Log.e("path", it) }
@@ -160,7 +159,6 @@ class VoiceRecordingsFragment : Fragment() {
                 false -> "Start playing"
             }
             mStartPlaying = !mStartPlaying
-
         }
 
         var mStartRecording = true
@@ -173,19 +171,69 @@ class VoiceRecordingsFragment : Fragment() {
             }
             mStartRecording = !mStartRecording
         }
-        ApiModule.retrofit.busStations().enqueue(object : Callback<List<BusStationsResponse>> {
-            override fun onResponse(call: Call<List<BusStationsResponse>>, response: Response<List<BusStationsResponse>>) {
+        binding.uploadButton.setOnClickListener {
+            uploadFile()
+        }
+        return binding.root
+    }
+
+    private fun uploadFile() {
+        val file = File(fileName)
+        val requestFile: RequestBody = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+
+        val body: MultipartBody.Part = MultipartBody.Part.createFormData("voice_recording", file.name, requestFile)
+
+        val name: RequestBody = file.name.toRequestBody()
+
+        val timeZone: TimeZone = TimeZone.getTimeZone("CET")
+        val calendar: Calendar = Calendar.getInstance(timeZone)
+        val dateTime: RequestBody = calendar.time.toString().toRequestBody()
+        val latitude: RequestBody = currentLocation.latitude.toString().toRequestBody()
+        val longitude: RequestBody = currentLocation.longitude.toString().toRequestBody()
+
+        ApiModule.retrofit.uploadVoiceRecording(name, latitude, longitude, dateTime,body).enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful) {
-                    Log.d("shows success", "on success: " + response.body()?.get(1))
+                    Log.d("shows success", "on success: " + response.body())
+                    val text = "upload successful!"
+                    val duration = Toast.LENGTH_SHORT
+                    val toast = Toast.makeText(requireContext(), text, duration)
+                    toast.show()
                 }
             }
 
-            override fun onFailure(call: Call<List<BusStationsResponse>>, t: Throwable) {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 Log.d("shows fail", "onFailure: " + t + call.toString())
             }
 
         })
-        return binding.root
+    }
+
+    private fun getLocation()
+    {
+        fusedLocationClient =
+            LocationServices.getFusedLocationProviderClient(requireActivity().applicationContext)
+        if (context?.let {
+                ActivityCompat.checkSelfPermission(
+                    it,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
+            } != PackageManager.PERMISSION_GRANTED && context?.let {
+                ActivityCompat.checkSelfPermission(
+                    it,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            } != PackageManager.PERMISSION_GRANTED
+        )
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location: Location? ->
+                    if (location != null) {
+                        currentLocation.latitude = location.latitude
+                        currentLocation.longitude = location.longitude
+                    }
+
+                }
+
     }
 
     override fun onStop() {
@@ -194,5 +242,14 @@ class VoiceRecordingsFragment : Fragment() {
         recorder = null
         player?.release()
         player = null
+    }
+
+    init {
+        this.activityResultLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { result ->
+            var allAreGranted = true
+            for (b in result.values) allAreGranted = allAreGranted && b
+        }
     }
 }

@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import pora.data.proj.databinding.FragmentSpeedometerBinding
 import java.math.RoundingMode
@@ -44,10 +45,11 @@ class SpeedometerFragment : Fragment(), SensorEventListener
     private var isSlow = false
     private var isFast = false
 
+    private val minutesToSeconds = 60
     private var minutes = 5
     private var uuid = UUID.randomUUID().toString()
     private var startTime = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
-    private var endTime = startTime + minutes * 60
+    private var endTime = startTime + minutes * minutesToSeconds
 
     private var samples = mutableListOf<List<Float>>()
 
@@ -86,7 +88,7 @@ class SpeedometerFragment : Fragment(), SensorEventListener
             binding.timerText.text = "Send every ${binding.timeSlider.value.toInt()} minutes"
 
             minutes = binding.timeSlider.value.toInt()
-            endTime = startTime + minutes * 60
+            endTime = startTime + minutes * minutesToSeconds
         }
 
         return binding.root
@@ -124,11 +126,19 @@ class SpeedometerFragment : Fragment(), SensorEventListener
                         override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                             if (response.isSuccessful) {
                                 Log.d("shows success", "on success: " + response.body())
+                                val text = "upload successful!"
+                                val duration = Toast.LENGTH_SHORT
+                                val toast = Toast.makeText(requireContext(), text, duration)
+                                toast.show()
                             }
                         }
 
                         override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                             Log.d("shows fail", "onFailure: " + t + call.toString())
+                            val text = "upload failed!"
+                            val duration = Toast.LENGTH_SHORT
+                            val toast = Toast.makeText(requireContext(), text, duration)
+                            toast.show()
                         }
 
                     })
@@ -136,12 +146,16 @@ class SpeedometerFragment : Fragment(), SensorEventListener
                     samples.clear()
 
                     startTime = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
-                    endTime = startTime + minutes * 60
+                    endTime = startTime + minutes * minutesToSeconds
                 }
             }
 
             if (!simulating)
             {
+                if (event.values[0] > 40 || event.values[1] > 40 || event.values[2] > 100)
+                    Toast.makeText(context, "Extreme event happened, call help!", Toast.LENGTH_LONG).show()
+
+
                 binding.xText.text =
                     event.values[0].toBigDecimal().setScale(1, RoundingMode.HALF_EVEN).toString()
                 binding.yText.text =

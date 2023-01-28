@@ -23,6 +23,7 @@ interface ApiService {
     @POST("/images/upload")
     fun uploadImage(
         @Part("name") name: RequestBody,
+        @Part("person_count") personCount: RequestBody,
         @Part("station_id") id: RequestBody,
         @Part("latitude") lat: RequestBody,
         @Part("longitude") long: RequestBody,

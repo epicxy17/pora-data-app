@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
@@ -25,6 +26,7 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.LinkedList
 import java.util.TimeZone
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -33,6 +35,7 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
+import org.tensorflow.lite.task.vision.detector.Detection
 import pora.data.proj.databinding.FragmentPhotosBinding
 import pora.data.proj.networking.ApiModule
 import retrofit2.Call
@@ -42,7 +45,7 @@ import retrofit2.Response
 private const val CAMERA_REQUEST_CODE = 101
 private const val REQUEST_IMAGE_CAPTURE = 1
 
-class PhotosFragment : Fragment() {
+class PhotosFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
     private var _binding: FragmentPhotosBinding? = null
     private val binding get() = _binding!!
@@ -50,7 +53,7 @@ class PhotosFragment : Fragment() {
     private lateinit var currentPhotoPath: String
     private val args by navArgs<PhotosFragmentArgs>()
 
-
+    private lateinit var objectDetectorHelper: ObjectDetectorHelper
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreate(savedInstanceState)
@@ -63,7 +66,9 @@ class PhotosFragment : Fragment() {
 
         binding.name.text = args.name
         binding.location.text = "x: " + args.lat.toString() + " || y: " + args.long.toString()
-
+        objectDetectorHelper = ObjectDetectorHelper(
+            context = requireContext(),
+            objectDetectorListener = this)
         return binding.root
     }
 
@@ -160,11 +165,15 @@ class PhotosFragment : Fragment() {
         }
         BitmapFactory.decodeFile(currentPhotoPath, bmOptions)?.also { bitmap ->
             binding.takenPicture.setImageBitmap(bitmap)
+            detectObjects(bitmap)
         }
-        uploadFile()
     }
 
-    private fun uploadFile() {
+    private fun detectObjects(bitmap: Bitmap) {
+        objectDetectorHelper.detect(bitmap, 0)
+    }
+
+    private fun uploadFile(a: Int) {
         val file = File(currentPhotoPath)
         val requestFile: RequestBody = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
 
@@ -175,13 +184,14 @@ class PhotosFragment : Fragment() {
         val id: RequestBody = args.id.toRequestBody()
         val lat: RequestBody = args.long.toString().toRequestBody()
         val long: RequestBody = args.lat.toString().toRequestBody()
+        val personCount: RequestBody = a.toString().toRequestBody()
 
         val timeZone: TimeZone = TimeZone.getTimeZone("CET")
         val calendar: Calendar = Calendar.getInstance(timeZone)
         val dateTime: RequestBody = calendar.time.toString().toRequestBody()
 
 
-        ApiModule.retrofit.uploadImage(name, id, lat, long, dateTime, body).enqueue(object : Callback<ResponseBody> {
+        ApiModule.retrofit.uploadImage(name, personCount, id, lat, long, dateTime, body).enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful) {
                     Log.d("shows success", "on success: " + response.body())
@@ -197,5 +207,24 @@ class PhotosFragment : Fragment() {
             }
 
         })
+    }
+
+    override fun onError(error: String) {
+        activity?.runOnUiThread {
+            Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
+        }    }
+
+    override fun onResults(results: MutableList<Detection>?, inferenceTime: Long, imageHeight: Int, imageWidth: Int) {
+        activity?.runOnUiThread {
+            if(results !== null) {
+                var a = 0;
+                for (c in results) {
+                    if (c.categories[0].label == "person")
+                        a++
+                }
+                Log.e("count", a.toString())
+                uploadFile(a)
+            }
+        }
     }
 }

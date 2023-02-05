@@ -174,6 +174,7 @@ class PhotosFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     }
 
     private fun uploadFile(a: Int) {
+        binding.count.text = "person count: $a"
         val file = File(currentPhotoPath)
         val requestFile: RequestBody = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
 
